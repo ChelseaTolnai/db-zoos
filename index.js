@@ -22,14 +22,36 @@ server.post('/api/zoos', async (req, res) => {
     const zoo = req.body;
     if (zoo.name) {
       const [id] = await db('zoos').insert(zoo);
-
       res.status(201).json(id)
     } else {
       res.status(400).json({error: "Zoo name is required."})
     }
-
   } catch (error) {
     res.status(500).json({error: "Error adding zoo."})
+  }
+});
+
+server.get('/api/zoos', async (req, res) => {
+  try {
+    const zoos = await db('zoos');
+    res.status(200).json(zoos)
+  } catch (err) {
+    res.status(500).json({error: "Error getting zoos."})
+  }
+});
+
+server.get('/api/zoos/:id', async (req, res) => {
+  try {
+    const zoo = await db('zoos')
+      .where({ id: req.params.id })
+      .first();
+    if (zoo) {
+      res.status(200).json(zoo)
+    } else {
+      res.status(404).json({error: "Zoo with specified ID does not exist."})
+    }
+  } catch (err) {
+    res.status(500).json({error: "Error getting specified zoo."})
   }
 });
 
