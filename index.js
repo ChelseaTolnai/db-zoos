@@ -35,7 +35,7 @@ server.get('/api/zoos', async (req, res) => {
   try {
     const zoos = await db('zoos');
     res.status(200).json(zoos)
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({error: "Error getting zoos."})
   }
 });
@@ -50,8 +50,49 @@ server.get('/api/zoos/:id', async (req, res) => {
     } else {
       res.status(404).json({error: "Zoo with specified ID does not exist."})
     }
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({error: "Error getting specified zoo."})
+  }
+});
+
+server.put('/api/zoos/:id', async (req, res) => {
+  try {
+    const zoo = req.body;
+    if (zoo.name) {
+      const count = await db('zoos')
+      .where({ id: req.params.id })
+      .update(zoo);
+
+      if (count > 0) {
+        const updatedZoo = await db('zoos')
+        .where({ id: req.params.id })
+        .first();
+
+        res.status(200).json(updatedZoo)
+      } else {
+        res.status(404).json({error: "Zoo with specified ID does not exist."})
+      }
+    } else {
+      res.status(400).json({error: "Zoo name is required."})
+    }
+  } catch (error) {
+    res.status(500).json({error: "Error updating specified zoo."})
+  }
+});
+
+server.delete('/api/zoos/:id', async (req, res) => {
+  try {
+    const count = await db('zoos')
+    .where({ id: req.params.id })
+    .del();
+
+    if (count > 0) {
+      res.status(204).end()
+    } else {
+      res.status(404).json({error: "Zoo with specified ID does not exist."})
+    }
+  } catch (error) {
+    res.status(500).json({error: "Error deleting specified zoo."})
   }
 });
 
